@@ -144,15 +144,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 加载本地存储的数据
 function loadData() {
-    const savedData = localStorage.getItem('familyCheckinData');
-    if (savedData) {
-        users = JSON.parse(savedData);
+    try {
+        const savedData = localStorage.getItem('familyCheckinData');
+        if (savedData) {
+            const parsed = JSON.parse(savedData);
+            // 验证数据完整性：确保三个用户都存在
+            if (parsed && parsed['圆圆'] && parsed['爸爸'] && parsed['妈妈']) {
+                users = parsed;
+                console.log('[数据] 成功从本地存储加载数据');
+            } else {
+                console.warn('[数据] 本地存储数据不完整，使用默认数据');
+                saveData(); // 用默认数据覆盖，确保存储有效
+            }
+        } else {
+            console.log('[数据] 首次使用，初始化默认数据');
+            saveData(); // 首次使用，保存默认数据
+        }
+    } catch (e) {
+        console.error('[数据] 加载本地存储数据失败，使用默认数据:', e);
+        saveData(); // 数据损坏时，用默认数据覆盖
     }
 }
 
 // 保存数据到本地存储
 function saveData() {
-    localStorage.setItem('familyCheckinData', JSON.stringify(users));
+    try {
+        localStorage.setItem('familyCheckinData', JSON.stringify(users));
+        console.log('[数据] 数据已保存到本地存储');
+    } catch (e) {
+        console.error('[数据] 保存数据失败:', e);
+        // 尝试清理旧数据后重新保存
+        try {
+            localStorage.removeItem('familyCheckinData');
+            localStorage.setItem('familyCheckinData', JSON.stringify(users));
+            console.log('[数据] 清理后重新保存成功');
+        } catch (e2) {
+            console.error('[数据] 重新保存也失败，localStorage 可能已满:', e2);
+        }
+    }
 }
 
 // 检查并重置所有用户的每日任务
@@ -162,10 +191,12 @@ function checkAndResetAllUsersDailyTasks() {
     
     // 如果是新的一天，重置所有用户的completedToday标记
     if (lastResetDate !== today) {
+        console.log('[数据] 检测到新的一天，重置每日任务状态');
         Object.keys(users).forEach(userName => {
             checkAndResetDailyTasks(userName);
         });
         localStorage.setItem('lastResetDate', today);
+        saveData(); // 重置后保存数据
     }
 }
 
@@ -449,6 +480,26 @@ function checkin(taskId) {
     const task = user.tasks.find(t => t.id === taskId);
     
     if (task && !task.completedToday) {
+        // ===== 立即更新按钮UI，给用户即时反馈 =====
+        // 找到对应的打卡按钮，立即变灰+播放动画
+        const taskItems = document.querySelectorAll('.task-item');
+        let targetBtn = null;
+        taskItems.forEach(item => {
+            const checkinBtn = item.querySelector('.btn-checkin');
+            if (checkinBtn) {
+                const onclickAttr = checkinBtn.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(`checkin(${taskId})`)) {
+                    targetBtn = checkinBtn;
+                    // 立即禁用按钮，防止重复点击
+                    checkinBtn.disabled = true;
+                    checkinBtn.classList.add('checkin-animating');
+                    checkinBtn.textContent = '✓ 已完成';
+                    checkinBtn.classList.add('completed');
+                    checkinBtn.classList.remove('checkin-animating');
+                }
+            }
+        });
+        
         // 添加积分
         user.points += task.points;
         user.totalPoints += task.points;
@@ -480,7 +531,7 @@ function checkin(taskId) {
         updateCurrentUserDisplay();
         updateUserCards();
         
-        // 就地更新打卡按钮状态（不重新渲染整个列表，避免闪烁）
+        // 就地更新打卡按钮状态（添加撤回按钮等）
         updateTaskItemUI(taskId);
         
         // 显示成功弹窗
