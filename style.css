@@ -969,6 +969,172 @@ header {
     transform: translateY(0);
 }
 
+/* 积分管理 */
+.points-management {
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.points-management h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.management-hint {
+    color: #999;
+    font-size: 13px;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: #fff3e0;
+    border-radius: 8px;
+    border-left: 3px solid #ff9800;
+}
+
+.points-management-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-warning {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 150px;
+}
+
+.btn-warning:hover {
+    background: #f57c00;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.btn-warning:active {
+    transform: translateY(0);
+}
+
+.btn-danger {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 150px;
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+}
+
+/* 积分清空确认弹窗 */
+.confirm-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 420px;
+    width: 90%;
+    animation: modalFadeIn 0.3s ease;
+}
+
+.confirm-modal-content .warning-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+    animation: warningShake 0.5s ease-in-out;
+}
+
+@keyframes warningShake {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+.confirm-modal-content .warning-text {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.confirm-modal-content .warning-detail {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.confirm-modal-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.confirm-cancel {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.confirm-cancel:hover {
+    background: #e0e0e0;
+}
+
+.confirm-danger {
+    background: #f44336;
+    color: white;
+}
+
+.confirm-danger:hover {
+    background: #d32f2f;
+}
+
+/* 清空成功提示 */
+.clear-success-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: #4caf50;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
+    z-index: 2000;
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.clear-success-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
 /* 家庭动态 */
 .family-rankings,
 .family-feed {
