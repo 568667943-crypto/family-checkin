@@ -476,10 +476,12 @@ function checkin(taskId) {
         // 保存数据
         saveData();
         
-        // 更新所有显示
+        // 更新顶部的积分和等级显示
         updateCurrentUserDisplay();
         updateUserCards();
-        loadTasks();
+        
+        // 就地更新打卡按钮状态（不重新渲染整个列表，避免闪烁）
+        updateTaskItemUI(taskId);
         
         // 显示成功弹窗
         showCheckinModal(task);
@@ -533,7 +535,7 @@ function undoCheckin(taskId) {
     // 更新显示
     updateCurrentUserDisplay();
     updateUserCards();
-    loadTasks();
+    updateTaskItemUI(taskId);
     
     // 添加到家庭动态
     addFamilyFeed(currentUser, `撤回了「${task.name}」的打卡记录`);
@@ -1459,7 +1461,57 @@ function checkAllCategories(user) {
     return categories.size >= 3; // 简化条件
 }
 
-// 辅助函数：检查是否是第一名
+// 就地更新单个任务卡片的UI（打卡/撤回后不重新渲染整个列表）
+function updateTaskItemUI(taskId) {
+    const user = users[currentUser];
+    const task = user.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // 找到对应的 task-item DOM 元素
+    const taskItems = document.querySelectorAll('.task-item');
+    let targetItem = null;
+    
+    taskItems.forEach(item => {
+        const checkinBtn = item.querySelector('.btn-checkin');
+        if (checkinBtn) {
+            const onclickAttr = checkinBtn.getAttribute('onclick');
+            if (onclickAttr && onclickAttr.includes(`checkin(${taskId})`)) {
+                targetItem = item;
+            }
+        }
+    });
+    
+    if (!targetItem) {
+        // 如果找不到DOM元素，回退到重新渲染整个列表
+        loadTasks();
+        return;
+    }
+    
+    // 更新卡片样式
+    if (task.completedToday) {
+        targetItem.classList.add('completed');
+    } else {
+        targetItem.classList.remove('completed');
+    }
+    
+    // 重建操作按钮区域
+    const taskActions = targetItem.querySelector('.task-actions');
+    if (taskActions) {
+        taskActions.innerHTML = `
+            <div class="task-points">+${task.points}</div>
+            <button class="btn-edit" onclick="editTask(${task.id})" title="编辑任务">✏️</button>
+            <button class="btn-delete" onclick="deleteTask(${task.id})" title="删除任务">🗑️</button>
+            ${task.completedToday ? `
+            <button class="btn-undo-checkin" onclick="undoCheckin(${task.id})" title="撤回本次打卡">↩️ 撤回</button>
+            ` : ''}
+            <button class="btn-checkin ${task.completedToday ? 'completed' : ''}" 
+                    onclick="checkin(${task.id})" 
+                    ${task.completedToday ? 'disabled' : ''}>
+                ${task.completedToday ? '✓ 已完成' : '打卡'}
+            </button>
+        `;
+    }
+}
 function isTopRank(user) {
     const sortedUsers = Object.entries(users).sort((a, b) => b[1].totalPoints - a[1].totalPoints);
     return sortedUsers[0][0] === currentUser;
