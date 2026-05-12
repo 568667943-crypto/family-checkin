@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭打卡奖励程序</title>
+    <link rel="stylesheet" href="style.css?v=7">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录/选择用户界面 -->
+        <div id="user-select" class="container">
+            <h1>👨‍👩‍👧 家庭打卡奖励程序</h1>
+            <p class="subtitle">养成好习惯，赢取奖励！</p>
+            <div class="user-cards">
+                <div class="user-card" onclick="selectUser('圆圆')">
+                    <div class="avatar" id="avatar-yuanyuan" onclick="event.stopPropagation(); document.getElementById('avatar-upload-yuanyuan').click();">👧
+                        <div class="avatar-overlay">📷 更换</div>
+                    </div>
+                    <input type="file" id="avatar-upload-yuanyuan" accept="image/*" style="display: none;" onchange="uploadAvatar('圆圆', this)">
+                    <h3>圆圆</h3>
+                    <p>8岁 · 学习之星</p>
+                    <div class="user-stats">
+                        <span>积分: <strong id="yuanyuan-points">0</strong></span>
+                        <span>等级: <strong id="yuanyuan-level">新手</strong></span>
+                    </div>
+                </div>
+                <div class="user-card" onclick="selectUser('爸爸')">
+                    <div class="avatar" id="avatar-baba" onclick="event.stopPropagation(); document.getElementById('avatar-upload-baba').click();">👨
+                        <div class="avatar-overlay">📷 更换</div>
+                    </div>
+                    <input type="file" id="avatar-upload-baba" accept="image/*" style="display: none;" onchange="uploadAvatar('爸爸', this)">
+                    <h3>爸爸</h3>
+                    <p>知识达人 · 运动健将</p>
+                    <div class="user-stats">
+                        <span>积分: <strong id="baba-points">0</strong></span>
+                        <span>等级: <strong id="baba-level">新手</strong></span>
+                    </div>
+                </div>
+                <div class="user-card" onclick="selectUser('妈妈')">
+                    <div class="avatar" id="avatar-mama" onclick="event.stopPropagation(); document.getElementById('avatar-upload-mama').click();">👩
+                        <div class="avatar-overlay">📷 更换</div>
+                    </div>
+                    <input type="file" id="avatar-upload-mama" accept="image/*" style="display: none;" onchange="uploadAvatar('妈妈', this)">
+                    <h3>妈妈</h3>
+                    <p>运动女神 · 家庭支柱</p>
+                    <div class="user-stats">
+                        <span>积分: <strong id="mama-points">0</strong></span>
+                        <span>等级: <strong id="mama-level">新手</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主界面 -->
+        <div id="main-interface" class="container hidden">
+            <!-- 顶部导航 -->
+            <header>
+                <button onclick="showScreen('user-select')" class="btn-back">← 切换用户</button>
+                <h2 id="current-user-title">圆圆的打卡中心</h2>
+                <div class="header-info">
+                    <span class="points-display">💰 积分: <span id="current-points">0</span></span>
+                    <span class="level-display">⭐ 等级: <span id="current-level">新手</span></span>
+                </div>
+            </header>
+
+            <!-- 导航标签 -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="checkin" onclick="switchTab('checkin')">📝 每日打卡</button>
+                <button class="tab-btn" data-tab="rewards" onclick="switchTab('rewards')">🎁 奖励商城</button>
+                <button class="tab-btn" data-tab="statistics" onclick="switchTab('statistics')">📊 数据统计</button>
+                <button class="tab-btn" data-tab="achievements" onclick="switchTab('achievements')">🏆 成就徽章</button>
+                <button class="tab-btn" data-tab="family" onclick="switchTab('family')">👨‍👩‍👧 家庭动态</button>
+            </nav>
+
+            <!-- 打卡界面 -->
+            <div id="checkin-screen" class="screen active">
+                <h3>今日打卡任务</h3>
+                <div id="task-list" class="task-list">
+                    <!-- 任务列表动态生成 -->
+                </div>
+                <div class="quick-add">
+                    <h4>➕ 快速添加任务</h4>
+                    <input type="text" id="new-task-input" placeholder="输入新任务名称...">
+                    <select id="new-task-category">
+                        <option value="study">📚 学习</option>
+                        <option value="sports">🏃 运动</option>
+                        <option value="game">🎮 游戏</option>
+                        <option value="reading">📖 阅读</option>
+                        <option value="housework">🏠 家务</option>
+                        <option value="custom">⭐ 自定义</option>
+                    </select>
+                    <input type="number" id="new-task-points" placeholder="积分" value="10" min="1" max="100">
+                    <button onclick="addCustomTask()" class="btn-primary">添加任务</button>
+                </div>
+            </div>
+
+            <!-- 奖励商城界面 -->
+            <div id="rewards-screen" class="screen">
+                <h3>🎁 奖励商城</h3>
+                <div class="rewards-intro">
+                    <p>用你赚取的积分兑换想要的奖励吧！</p>
+                </div>
+                <div id="rewards-list" class="rewards-list">
+                    <!-- 奖励列表动态生成 -->
+                </div>
+                <div class="quick-add">
+                    <h4>➕ 添加自定义奖励</h4>
+                    <input type="text" id="new-reward-input" placeholder="奖励名称...">
+                    <input type="number" id="new-reward-points" placeholder="所需积分" value="100" min="1">
+                    <button onclick="addCustomReward()" class="btn-primary">添加奖励</button>
+                </div>
+            </div>
+
+            <!-- 数据统计界面 -->
+            <div id="statistics-screen" class="screen">
+                <h3>📊 数据统计</h3>
+                <div class="stats-container">
+                    <div class="stats-card">
+                        <h4>连续打卡天数</h4>
+                        <div class="big-number" id="streak-days">0</div>
+                        <p>天</p>
+                    </div>
+                    <div class="stats-card">
+                        <h4>本周完成率</h4>
+                        <div class="big-number" id="week-completion">0%</div>
+                        <canvas id="completion-chart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="stats-card">
+                        <h4>累计积分</h4>
+                        <div class="big-number" id="total-points">0</div>
+                        <p>积分</p>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <h4>📅 打卡日历</h4>
+                    <div id="calendar" class="calendar">
+                        <!-- 日历动态生成 -->
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4>📈 积分趋势图</h4>
+                    <canvas id="points-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 成就徽章界面 -->
+            <div id="achievements-screen" class="screen">
+                <h3>🏆 成就徽章</h3>
+                <div id="achievements-list" class="achievements-list">
+                    <!-- 成就列表动态生成 -->
+                </div>
+                <div class="quick-add">
+                    <h4>➕ 添加自定义徽章</h4>
+                    <input type="text" id="new-achievement-name" placeholder="徽章名称...">
+                    <input type="text" id="new-achievement-icon" placeholder="图标（输入emoji，如 🎯）" value="🏅">
+                    <input type="text" id="new-achievement-desc" placeholder="徽章描述...">
+                    <select id="new-achievement-type">
+                        <option value="points">按积分解锁</option>
+                        <option value="streak">按连续打卡天数解锁</option>
+                    </select>
+                    <input type="number" id="new-achievement-required" placeholder="所需积分或天数" value="100" min="1">
+                    <button onclick="addCustomAchievement()" class="btn-primary">添加徽章</button>
+                </div>
+            </div>
+
+            <!-- 家庭动态界面 -->
+            <div id="family-screen" class="screen">
+                <h3>👨‍👩‍👧 家庭动态</h3>
+                <div class="family-rankings">
+                    <h4>📊 家庭排行榜</h4>
+                    <div id="family-rankings-list">
+                        <!-- 排行榜动态生成 -->
+                    </div>
+                </div>
+                <div class="family-feed">
+                    <h4>💬 最近动态</h4>
+                    <div id="family-feed-list">
+                        <!-- 动态列表动态生成 -->
+                    </div>
+                </div>
+                <div class="encourage-section">
+                    <h4>💪 给家人打气</h4>
+                    <select id="encourage-user">
+                        <option value="圆圆">给圆圆打气</option>
+                        <option value="爸爸">给爸爸打气</option>
+                        <option value="妈妈">给妈妈打气</option>
+                    </select>
+                    <textarea id="encourage-message" placeholder="写下你的鼓励..."></textarea>
+                    <button onclick="sendEncouragement()" class="btn-primary">发送鼓励 👏</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打卡成功弹窗 -->
+    <div id="checkin-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>🎉 打卡成功！</h3>
+            <p id="checkin-message">你完成了任务，获得了10积分！</p>
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn-primary">太棒了！</button>
+                <button onclick="shareAchievement()" class="btn-secondary">分享给家人</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 兑换成功弹窗 -->
+    <div id="redeem-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>🎁 兑换成功！</h3>
+            <p id="redeem-message">你成功兑换了奖励！</p>
+            <button onclick="closeRedeemModal()" class="btn-primary">好的</button>
+        </div>
+    </div>
+
+    <!-- 编辑任务弹窗 -->
+    <div id="edit-task-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>✏️ 编辑任务</h3>
+            <input type="hidden" id="edit-task-id">
+            <div class="form-group">
+                <label>任务名称</label>
+                <input type="text" id="edit-task-name" placeholder="输入任务名称...">
+            </div>
+            <div class="form-group">
+                <label>任务分类</label>
+                <select id="edit-task-category">
+                    <option value="study">📚 学习</option>
+                    <option value="sports">🏃 运动</option>
+                    <option value="game">🎮 游戏</option>
+                    <option value="reading">📖 阅读</option>
+                    <option value="housework">🏠 家务</option>
+                    <option value="custom">⭐ 自定义</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>完成获得积分</label>
+                <input type="number" id="edit-task-points" placeholder="积分" min="1" max="100">
+            </div>
+            <div class="modal-actions">
+                <button onclick="saveTaskEdit()" class="btn-primary">保存</button>
+                <button onclick="closeEditModal()" class="btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑奖励弹窗 -->
+    <div id="edit-reward-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>✏️ 编辑奖励</h3>
+            <input type="hidden" id="edit-reward-id">
+            <div class="form-group">
+                <label>奖励名称</label>
+                <input type="text" id="edit-reward-name" placeholder="输入奖励名称...">
+            </div>
+            <div class="form-group">
+                <label>所需积分</label>
+                <input type="number" id="edit-reward-cost" placeholder="所需积分" min="1">
+            </div>
+            <div class="modal-actions">
+                <button onclick="saveRewardEdit()" class="btn-primary">保存</button>
+                <button onclick="closeRewardEditModal()" class="btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑徽章弹窗 -->
+    <div id="edit-achievement-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>✏️ 编辑徽章</h3>
+            <input type="hidden" id="edit-achievement-id">
+            <div class="form-group">
+                <label>徽章名称</label>
+                <input type="text" id="edit-achievement-name" placeholder="输入徽章名称...">
+            </div>
+            <div class="form-group">
+                <label>徽章图标（emoji）</label>
+                <input type="text" id="edit-achievement-icon" placeholder="🏅">
+            </div>
+            <div class="form-group">
+                <label>徽章描述</label>
+                <input type="text" id="edit-achievement-desc" placeholder="输入徽章描述...">
+            </div>
+            <div class="form-group">
+                <label>解锁条件</label>
+                <select id="edit-achievement-type">
+                    <option value="points">按积分解锁</option>
+                    <option value="streak">按连续打卡天数解锁</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>所需积分或天数</label>
+                <input type="number" id="edit-achievement-required" placeholder="数值" min="1">
+            </div>
+            <div class="modal-actions">
+                <button onclick="saveAchievementEdit()" class="btn-primary">保存</button>
+                <button onclick="closeAchievementEditModal()" class="btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
