@@ -243,6 +243,40 @@ function updateCurrentUserDisplay() {
     document.getElementById('current-level').textContent = user.level;
 }
 
+// 刷新当前活动页面的所有数据
+function refreshCurrentView() {
+    if (!currentUser) return;
+    
+    // 更新顶部的积分和等级显示
+    updateCurrentUserDisplay();
+    
+    // 更新用户选择页面的卡片
+    updateUserCards();
+    
+    // 刷新当前活动标签页的内容
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab) {
+        const tabName = activeTab.getAttribute('data-tab');
+        switch(tabName) {
+            case 'checkin':
+                loadTasks();
+                break;
+            case 'rewards':
+                loadRewards();
+                break;
+            case 'statistics':
+                loadStatistics();
+                break;
+            case 'achievements':
+                loadAchievements();
+                break;
+            case 'family':
+                loadFamilyScreen();
+                break;
+        }
+    }
+}
+
 // 切换标签
 function switchTab(tabName) {
     // 更新按钮状态 - 根据data-tab属性找到对应的按钮
@@ -442,8 +476,9 @@ function checkin(taskId) {
         // 保存数据
         saveData();
         
-        // 更新显示
+        // 更新所有显示
         updateCurrentUserDisplay();
+        updateUserCards();
         loadTasks();
         
         // 显示成功弹窗
@@ -497,6 +532,7 @@ function undoCheckin(taskId) {
     
     // 更新显示
     updateCurrentUserDisplay();
+    updateUserCards();
     loadTasks();
     
     // 添加到家庭动态
@@ -601,6 +637,8 @@ function showCheckinModal(task) {
 // 关闭弹窗
 function closeModal() {
     document.getElementById('checkin-modal').classList.add('hidden');
+    // 关闭弹窗后刷新页面数据，确保显示最新状态
+    refreshCurrentView();
 }
 
 // 分享成就
@@ -655,6 +693,7 @@ function redeemReward(rewardId) {
         
         saveData();
         updateCurrentUserDisplay();
+        updateUserCards();
         loadRewards();
         
         // 显示兑换成功弹窗
@@ -670,6 +709,8 @@ function redeemReward(rewardId) {
 // 关闭兑换弹窗
 function closeRedeemModal() {
     document.getElementById('redeem-modal').classList.add('hidden');
+    // 关闭弹窗后刷新页面数据
+    refreshCurrentView();
 }
 
 // ============ 奖励管理功能 ============
