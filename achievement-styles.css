@@ -1,0 +1,332 @@
+/* 成就列表 - 游戏勋章风格 */
+.achievements-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 40px;
+    padding: 30px 20px;
+    justify-items: center;
+}
+
+/* 勋章基础样式 */
+.achievement-item {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 3px solid #b8860b;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: visible;
+}
+
+/* 勋章外圈装饰 - 月桂叶花环效果 */
+.achievement-item::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 100% 50%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 80% 90%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 20% 90%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 0% 50%, rgba(205, 127, 50, 0.6) 0%, transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(205, 127, 50, 0.6) 0%, transparent 30%);
+    background-size: 100% 100%;
+    z-index: -1;
+    filter: drop-shadow(0 0 8px rgba(205, 127, 50, 0.6)) brightness(1.2);
+}
+
+/* 勋章内圈高光 */
+.achievement-item::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.7);
+    z-index: -1;
+    box-shadow: 
+        inset 0 0 10px rgba(255, 215, 0, 0.3),
+        0 0 10px rgba(205, 127, 50, 0.4);
+}
+
+/* 未解锁的徽章 */
+.achievement-item:not(.unlocked) {
+    background: linear-gradient(145deg, #d0d0d0, #a0a0a0);
+    border-color: #888;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    opacity: 0.65;
+    animation: none;
+}
+
+.achievement-item:not(.unlocked)::before,
+.achievement-item:not(.unlocked)::after {
+    display: none;
+}
+
+/* 未解锁徽章的文字 */
+.achievement-item:not(.unlocked) h4,
+.achievement-item:not(.unlocked) p {
+    color: #666;
+    text-shadow: none;
+}
+
+/* 已解锁徽章 - 普通级别（青铜色） */
+.achievement-item.unlocked.rarity-common {
+    background: linear-gradient(145deg, #cd7f32, #8b4513);
+    border-color: #654321;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+        0 6px 12px rgba(139, 69, 19, 0.5),
+        0 0 20px rgba(205, 127, 50, 0.3);
+}
+
+.achievement-item.unlocked.rarity-common::before {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 100% 50%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 90%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 90%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 0% 50%, rgba(205, 127, 50, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(205, 127, 50, 0.7) 0%, transparent 30%);
+    filter: drop-shadow(0 0 10px rgba(205, 127, 50, 0.7)) brightness(1.3);
+}
+
+/* 已解锁徽章 - 稀有级别（银色） */
+.achievement-item.unlocked.rarity-rare {
+    background: linear-gradient(145deg, #e8e8e8, #a0a0a0);
+    border-color: #707070;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.6),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 6px 12px rgba(128, 128, 128, 0.5),
+        0 0 25px rgba(192, 192, 192, 0.4);
+}
+
+.achievement-item.unlocked.rarity-rare::before {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 100% 50%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 90%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 90%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 0% 50%, rgba(192, 192, 192, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(192, 192, 192, 0.7) 0%, transparent 30%);
+    filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.7)) brightness(1.3);
+}
+
+/* 已解锁徽章 - 史诗级别（紫色） */
+.achievement-item.unlocked.rarity-epic {
+    background: linear-gradient(145deg, #9b30ff, #4b0082);
+    border-color: #2e004f;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 6px 12px rgba(75, 0, 130, 0.6),
+        0 0 30px rgba(155, 48, 255, 0.5);
+    animation: epicShine 3s ease-in-out infinite;
+}
+
+.achievement-item.unlocked.rarity-epic::before {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 100% 50%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 80% 90%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 90%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 0% 50%, rgba(155, 48, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(155, 48, 255, 0.7) 0%, transparent 30%);
+    filter: drop-shadow(0 0 12px rgba(155, 48, 255, 0.8)) brightness(1.4);
+}
+
+@keyframes epicShine {
+    0%, 100% {
+        box-shadow: 
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 6px 12px rgba(75, 0, 130, 0.6),
+            0 0 30px rgba(155, 48, 255, 0.5);
+    }
+    50% {
+        box-shadow: 
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 6px 12px rgba(75, 0, 130, 0.6),
+            0 0 40px rgba(155, 48, 255, 0.8),
+            0 0 60px rgba(193, 127, 255, 0.4);
+    }
+}
+
+/* 已解锁徽章 - 传说级别（黄金+彩虹） */
+.achievement-item.unlocked.rarity-legendary {
+    background: linear-gradient(145deg, #ffd700, #ff8c00);
+    border-color: #b8860b;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(255, 215, 0, 0.6),
+        0 0 40px rgba(255, 215, 0, 0.5);
+    animation: legendaryPulse 2s ease-in-out infinite;
+}
+
+.achievement-item.unlocked.rarity-legendary::before {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 100% 50%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 80% 90%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 20% 90%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 0% 50%, rgba(255, 215, 0, 0.8) 0%, transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(255, 215, 0, 0.8) 0%, transparent 30%);
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)) brightness(1.5);
+    animation: rainbowRotate 6s linear infinite;
+}
+
+@keyframes legendaryPulse {
+    0%, 100% {
+        box-shadow: 
+            inset 0 2px 4px rgba(255, 255, 255, 0.5),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+            0 8px 16px rgba(255, 215, 0, 0.6),
+            0 0 40px rgba(255, 215, 0, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 
+            inset 0 2px 4px rgba(255, 255, 255, 0.5),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+            0 8px 16px rgba(255, 215, 0, 0.6),
+            0 0 60px rgba(255, 215, 0, 0.8),
+            0 0 80px rgba(255, 107, 107, 0.4);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes rainbowRotate {
+    0% {
+        filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)) brightness(1.5) hue-rotate(0deg);
+    }
+    100% {
+        filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)) brightness(1.5) hue-rotate(360deg);
+    }
+}
+
+/* 徽章图标 - 勋章中央 */
+.achievement-icon {
+    font-size: 52px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.achievement-item.unlocked .achievement-icon {
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* 未解锁徽章的图标 */
+.achievement-item:not(.unlocked) .achievement-icon {
+    filter: grayscale(100%) brightness(0.7);
+}
+
+/* 徽章标题 - 金属质感 */
+.achievement-item h4 {
+    color: white;
+    font-size: 13px;
+    margin-bottom: 3px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+}
+
+/* 徽章描述 */
+.achievement-item p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 11px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    line-height: 1.3;
+}
+
+/* 稀有度标签 */
+.rarity-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.rarity-common .rarity-badge {
+    background: linear-gradient(135deg, #cd7f32, #8b4513);
+    color: white;
+}
+
+.rarity-rare .rarity-badge {
+    background: linear-gradient(135deg, #c0c0c0, #808080);
+    color: white;
+}
+
+.rarity-epic .rarity-badge {
+    background: linear-gradient(135deg, #9b30ff, #4b0082);
+    color: white;
+    box-shadow: 0 0 10px rgba(155, 48, 255, 0.5);
+}
+
+.rarity-legendary .rarity-badge {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #654321;
+    animation: legendaryPulse 2s ease-in-out infinite;
+}
+
+/* 悬停效果 */
+.achievement-item:hover {
+    transform: translateY(-8px) scale(1.05);
+}
+
+.achievement-item.unlocked:hover {
+    transform: translateY(-8px) scale(1.08);
+}
