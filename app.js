@@ -1,70 +1,84 @@
 // 家庭打卡奖励程序 - 主程序逻辑
 
+// 获取本地日期字符串（解决 toISOString 的时区问题）
+function getLocalDateString(date) {
+    date = date || new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 默认用户数据模板（仅用于首次初始化或修复）
+function getDefaultUsers() {
+    return {
+        '圆圆': {
+            points: 300,
+            level: '熟练',
+            tasks: [
+                { id: 1, name: '完成数学作业', category: 'study', points: 15, completed: false, completedToday: false },
+                { id: 2, name: '阅读30分钟', category: 'study', points: 10, completed: false, completedToday: false },
+                { id: 3, name: '跳绳100下', category: 'sports', points: 10, completed: false, completedToday: false },
+                { id: 4, name: '户外运动30分钟', category: 'sports', points: 15, completed: false, completedToday: false },
+                { id: 5, name: '玩益智游戏', category: 'game', points: 5, completed: false, completedToday: false }
+            ],
+            rewards: [
+                { id: 1, name: '玩电子游戏30分钟', cost: 50, redeemed: false },
+                { id: 2, name: '看动画片1集', cost: 30, redeemed: false },
+                { id: 3, name: '买一本新书', cost: 200, redeemed: false },
+                { id: 4, name: '去游乐场', cost: 500, redeemed: false }
+            ],
+            achievements: [1, 2, 3, 4, 8],
+            checkinHistory: {},
+            totalPoints: 300,
+            streak: 5
+        },
+        '爸爸': {
+            points: 0,
+            level: '新手',
+            tasks: [
+                { id: 1, name: '阅读专业书籍1小时', category: 'reading', points: 20, completed: false, completedToday: false },
+                { id: 2, name: '学习新技术30分钟', category: 'study', points: 15, completed: false, completedToday: false },
+                { id: 3, name: '完成家务打扫', category: 'housework', points: 15, completed: false, completedToday: false },
+                { id: 4, name: '跑步5公里', category: 'sports', points: 20, completed: false, completedToday: false },
+                { id: 5, name: '做晚饭', category: 'housework', points: 10, completed: false, completedToday: false }
+            ],
+            rewards: [
+                { id: 1, name: '买一本新书', cost: 100, redeemed: false },
+                { id: 2, name: '周末睡懒觉', cost: 50, redeemed: false },
+                { id: 3, name: '和朋友聚餐', cost: 200, redeemed: false },
+                { id: 4, name: '买新电子产品', cost: 1000, redeemed: false }
+            ],
+            achievements: [],
+            checkinHistory: {},
+            totalPoints: 0,
+            streak: 0
+        },
+        '妈妈': {
+            points: 0,
+            level: '新手',
+            tasks: [
+                { id: 1, name: '瑜伽/健身30分钟', category: 'sports', points: 15, completed: false, completedToday: false },
+                { id: 2, name: '散步/跑步', category: 'sports', points: 10, completed: false, completedToday: false },
+                { id: 3, name: '阅读30分钟', category: 'reading', points: 10, completed: false, completedToday: false }
+            ],
+            rewards: [
+                { id: 1, name: '买新衣服', cost: 200, redeemed: false },
+                { id: 2, name: 'SPA按摩', cost: 300, redeemed: false },
+                { id: 3, name: '和朋友聚餐', cost: 150, redeemed: false },
+                { id: 4, name: '买新护肤品', cost: 250, redeemed: false }
+            ],
+            achievements: [],
+            checkinHistory: {},
+            totalPoints: 0,
+            streak: 0
+        }
+    };
+}
+
 // 初始化数据
 let currentUser = null;
-let users = {
-    '圆圆': {
-        points: 300,
-        level: '熟练',
-        tasks: [
-            { id: 1, name: '完成数学作业', category: 'study', points: 15, completed: false, completedToday: false },
-            { id: 2, name: '阅读30分钟', category: 'study', points: 10, completed: false, completedToday: false },
-            { id: 3, name: '跳绳100下', category: 'sports', points: 10, completed: false, completedToday: false },
-            { id: 4, name: '户外运动30分钟', category: 'sports', points: 15, completed: false, completedToday: false },
-            { id: 5, name: '玩益智游戏', category: 'game', points: 5, completed: false, completedToday: false }
-        ],
-        rewards: [
-            { id: 1, name: '玩电子游戏30分钟', cost: 50, redeemed: false },
-            { id: 2, name: '看动画片1集', cost: 30, redeemed: false },
-            { id: 3, name: '买一本新书', cost: 200, redeemed: false },
-            { id: 4, name: '去游乐场', cost: 500, redeemed: false }
-        ],
-        achievements: [1, 2, 3, 4, 8],
-        checkinHistory: {},
-        totalPoints: 300,
-        streak: 5
-    },
-    '爸爸': {
-        points: 0,
-        level: '新手',
-        tasks: [
-            { id: 1, name: '阅读专业书籍1小时', category: 'reading', points: 20, completed: false, completedToday: false },
-            { id: 2, name: '学习新技术30分钟', category: 'study', points: 15, completed: false, completedToday: false },
-            { id: 3, name: '完成家务打扫', category: 'housework', points: 15, completed: false, completedToday: false },
-            { id: 4, name: '跑步5公里', category: 'sports', points: 20, completed: false, completedToday: false },
-            { id: 5, name: '做晚饭', category: 'housework', points: 10, completed: false, completedToday: false }
-        ],
-        rewards: [
-            { id: 1, name: '买一本新书', cost: 100, redeemed: false },
-            { id: 2, name: '周末睡懒觉', cost: 50, redeemed: false },
-            { id: 3, name: '和朋友聚餐', cost: 200, redeemed: false },
-            { id: 4, name: '买新电子产品', cost: 1000, redeemed: false }
-        ],
-        achievements: [],
-        checkinHistory: {},
-        totalPoints: 0,
-        streak: 0
-    },
-    '妈妈': {
-        points: 0,
-        level: '新手',
-        tasks: [
-            { id: 1, name: '瑜伽/健身30分钟', category: 'sports', points: 15, completed: false, completedToday: false },
-            { id: 2, name: '散步/跑步', category: 'sports', points: 10, completed: false, completedToday: false },
-            { id: 3, name: '阅读30分钟', category: 'reading', points: 10, completed: false, completedToday: false }
-        ],
-        rewards: [
-            { id: 1, name: '买新衣服', cost: 200, redeemed: false },
-            { id: 2, name: 'SPA按摩', cost: 300, redeemed: false },
-            { id: 3, name: '和朋友聚餐', cost: 150, redeemed: false },
-            { id: 4, name: '买新护肤品', cost: 250, redeemed: false }
-        ],
-        achievements: [],
-        checkinHistory: {},
-        totalPoints: 0,
-        streak: 0
-    }
-};
+let users = getDefaultUsers();
 
 // 成就徽章定义 - 基于积分或其他条件解锁
 const achievementsList = [
@@ -148,29 +162,93 @@ function loadData() {
         const savedData = localStorage.getItem('familyCheckinData');
         if (savedData) {
             const parsed = JSON.parse(savedData);
-            // 验证数据完整性：确保三个用户都存在
-            if (parsed && parsed['圆圆'] && parsed['爸爸'] && parsed['妈妈']) {
+            if (parsed && typeof parsed === 'object') {
+                // 使用合并策略：用默认数据补齐缺失的用户，但保留已有用户的数据
+                const defaultData = getDefaultUsers();
+                const requiredUsers = ['圆圆', '爸爸', '妈妈'];
+                let needsRepair = false;
+                
+                requiredUsers.forEach(userName => {
+                    if (!parsed[userName]) {
+                        // 缺失用户，用默认数据补齐
+                        console.warn(`[数据] 用户「${userName}」数据缺失，使用默认数据补齐`);
+                        parsed[userName] = defaultData[userName];
+                        needsRepair = true;
+                    } else {
+                        // 确保每个用户的数据结构完整
+                        const user = parsed[userName];
+                        const defaultUser = defaultData[userName];
+                        
+                        // 补齐缺失的字段（不覆盖已有值）
+                        if (user.points === undefined) { user.points = defaultUser.points; needsRepair = true; }
+                        if (user.totalPoints === undefined) { user.totalPoints = user.points || 0; needsRepair = true; }
+                        if (user.level === undefined) { user.level = defaultUser.level; needsRepair = true; }
+                        if (user.streak === undefined) { user.streak = 0; needsRepair = true; }
+                        if (!Array.isArray(user.tasks)) { user.tasks = defaultUser.tasks; needsRepair = true; }
+                        if (!Array.isArray(user.rewards)) { user.rewards = defaultUser.rewards; needsRepair = true; }
+                        if (!Array.isArray(user.achievements)) { user.achievements = []; needsRepair = true; }
+                        if (!user.checkinHistory || typeof user.checkinHistory !== 'object') { 
+                            user.checkinHistory = {}; needsRepair = true; 
+                        }
+                        
+                        // 确保每个 task 都有必要字段
+                        user.tasks.forEach(task => {
+                            if (task.completedToday === undefined) { task.completedToday = false; needsRepair = true; }
+                            if (task.completed === undefined) { task.completed = false; needsRepair = true; }
+                        });
+                    }
+                });
+                
                 users = parsed;
-                console.log('[数据] 成功从本地存储加载数据');
+                
+                if (needsRepair) {
+                    console.log('[数据] 检测到数据不完整，已自动修复并保存');
+                    saveData(); // 保存修复后的数据
+                } else {
+                    console.log('[数据] 成功从本地存储加载数据');
+                }
             } else {
-                console.warn('[数据] 本地存储数据不完整，使用默认数据');
-                saveData(); // 用默认数据覆盖，确保存储有效
+                console.warn('[数据] 本地存储数据格式异常，使用默认数据');
+                users = getDefaultUsers();
+                saveData();
             }
         } else {
             console.log('[数据] 首次使用，初始化默认数据');
-            saveData(); // 首次使用，保存默认数据
+            users = getDefaultUsers();
+            saveData();
         }
     } catch (e) {
         console.error('[数据] 加载本地存储数据失败，使用默认数据:', e);
-        saveData(); // 数据损坏时，用默认数据覆盖
+        // 不覆盖 localStorage，以防是 JSON 解析错误
+        // 先尝试备份损坏的数据
+        try {
+            const brokenData = localStorage.getItem('familyCheckinData');
+            if (brokenData) {
+                localStorage.setItem('familyCheckinData_backup', brokenData);
+                console.log('[数据] 已备份损坏的数据到 familyCheckinData_backup');
+            }
+        } catch (backupErr) {}
+        users = getDefaultUsers();
+        saveData();
     }
 }
 
 // 保存数据到本地存储
 function saveData() {
     try {
-        localStorage.setItem('familyCheckinData', JSON.stringify(users));
-        console.log('[数据] 数据已保存到本地存储');
+        const dataStr = JSON.stringify(users);
+        localStorage.setItem('familyCheckinData', dataStr);
+        
+        // 验证保存是否成功：读取并对比
+        const savedStr = localStorage.getItem('familyCheckinData');
+        if (savedStr !== dataStr) {
+            console.error('[数据] 保存验证失败，数据不一致！');
+            // 重试一次
+            localStorage.removeItem('familyCheckinData');
+            localStorage.setItem('familyCheckinData', dataStr);
+        }
+        
+        console.log('[数据] 数据已保存到本地存储，大小:', (dataStr.length / 1024).toFixed(1), 'KB');
     } catch (e) {
         console.error('[数据] 保存数据失败:', e);
         // 尝试清理旧数据后重新保存
@@ -186,7 +264,7 @@ function saveData() {
 
 // 检查并重置所有用户的每日任务
 function checkAndResetAllUsersDailyTasks() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const lastResetDate = localStorage.getItem('lastResetDate');
     
     // 如果是新的一天，重置所有用户的completedToday标记
@@ -203,7 +281,7 @@ function checkAndResetAllUsersDailyTasks() {
 // 检查并重置单个用户的每日任务
 function checkAndResetDailyTasks(userName) {
     const user = users[userName];
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     
     // 根据今天的打卡记录，设置completedToday标记
     const todayCheckins = user.checkinHistory[today] || [];
@@ -512,7 +590,7 @@ function checkin(taskId) {
         updateStreak(currentUser);
         
         // 记录打卡历史
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateString();
         if (!user.checkinHistory[today]) {
             user.checkinHistory[today] = [];
         }
@@ -524,8 +602,20 @@ function checkin(taskId) {
         // 检查成就
         checkAchievements(currentUser);
         
-        // 保存数据
+        // 保存数据（确保积分和打卡记录持久化）
         saveData();
+        
+        // 二次验证：确认数据已成功保存
+        try {
+            const savedData = JSON.parse(localStorage.getItem('familyCheckinData') || '{}');
+            const savedUser = savedData[currentUser];
+            if (!savedUser || savedUser.points !== user.points) {
+                console.error('[数据] 积分保存验证失败！尝试重试保存...');
+                saveData(); // 重试一次
+            }
+        } catch (e) {
+            console.error('[数据] 保存验证异常:', e);
+        }
         
         // 更新顶部的积分和等级显示
         updateCurrentUserDisplay();
@@ -559,7 +649,7 @@ function undoCheckin(taskId) {
     // 注意：task.completed 保留，因为历史上完成过
     
     // 从今日打卡历史中移除
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     if (user.checkinHistory[today]) {
         const idx = user.checkinHistory[today].indexOf(task.id);
         if (idx !== -1) {
@@ -595,14 +685,14 @@ function undoCheckin(taskId) {
 // 重新从头计算连续打卡天数
 function recalculateStreak(userName) {
     const user = users[userName];
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     
     let streak = 0;
     let checkDate = new Date();
     
     // 从今天往前数，找连续有打卡记录的天数
     for (let i = 0; i < 365; i++) {
-        const dateStr = checkDate.toISOString().split('T')[0];
+        const dateStr = getLocalDateString(checkDate);
         if (user.checkinHistory[dateStr] && user.checkinHistory[dateStr].length > 0) {
             streak++;
             checkDate.setDate(checkDate.getDate() - 1);
@@ -636,8 +726,10 @@ function recheckAchievementsAfterUndo(userName) {
 // 更新连续打卡天数
 function updateStreak(userName) {
     const user = users[userName];
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const today = getLocalDateString();
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = getLocalDateString(yesterdayDate);
     
     if (user.checkinHistory[today] && user.checkinHistory[today].length > 0) {
         if (user.checkinHistory[yesterday] && user.checkinHistory[yesterday].length > 0) {
@@ -931,7 +1023,7 @@ function calculateWeekCompletion(userName) {
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = getLocalDateString(date);
         
         if (user.checkinHistory[dateStr] && user.checkinHistory[dateStr].length > 0) {
             completedDays++;
@@ -972,8 +1064,8 @@ function generateCalendar(userName) {
     // 添加日期
     for (let d = 1; d <= lastDay.getDate(); d++) {
         const date = new Date(today.getFullYear(), today.getMonth(), d);
-        const dateStr = date.toISOString().split('T')[0];
-        
+        const dateStr = getLocalDateString(date);
+
         const dayCell = document.createElement('div');
         dayCell.className = 'calendar-day';
         
@@ -1026,8 +1118,8 @@ function drawCharts(userName) {
         date.setDate(date.getDate() - i);
         labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
         
-        const dateStr = date.toISOString().split('T')[0];
-        const dayPoints = user.checkinHistory[dateStr] ? 
+        const dateStr = getLocalDateString(date);
+const dayPoints = user.checkinHistory[dateStr] ? 
             user.checkinHistory[dateStr].reduce((sum, taskId) => {
                 const task = user.tasks.find(t => t.id === taskId);
                 return sum + (task ? task.points : 0);
