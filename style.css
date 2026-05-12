@@ -266,15 +266,50 @@ header {
     font-size: 14px;
     transition: all 0.3s ease;
     margin-left: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-checkin:hover {
     background: #45a049;
+    transform: scale(1.05);
+}
+
+.btn-checkin:active {
+    transform: scale(0.95);
+}
+
+/* 打卡按钮点击动画 */
+@keyframes checkinRipple {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+.btn-checkin.checkin-animating {
+    animation: checkinRipple 0.5s ease-out;
+    background: #66bb6a;
 }
 
 .btn-checkin.completed {
-    background: #999;
+    background: #bbb;
     cursor: not-allowed;
+    color: #666;
+    transform: none;
+}
+
+.btn-checkin.completed:hover {
+    background: #bbb;
+    transform: none;
 }
 
 /* 撤回打卡按钮 */
