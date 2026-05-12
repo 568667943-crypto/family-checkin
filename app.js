@@ -1424,6 +1424,125 @@ function isTopRank(user) {
     return sortedUsers[0][0] === currentUser;
 }
 
+// ============ 积分清空功能 ============
+
+// 清空当前用户积分
+function clearCurrentUserPoints() {
+    const user = users[currentUser];
+    const pointsInfo = user.points > 0 ? `当前积分：${user.points}，累计积分：${user.totalPoints}` : '当前积分为0，累计积分也为0';
+    
+    showClearConfirm(
+        `确定要清空「${currentUser}」的积分吗？`,
+        `${pointsInfo}\n\n清空后：\n• 可用积分归零\n• 累计积分归零\n• 等级重置为"新手"\n• 已解锁的积分类成就将被撤销\n• 连续打卡天数和打卡历史不受影响`,
+        () => {
+            // 执行清空
+            user.points = 0;
+            user.totalPoints = 0;
+            user.level = '新手';
+            
+            // 重新检查成就，撤销不再满足条件的
+            recheckAchievementsAfterUndo(currentUser);
+            
+            saveData();
+            updateCurrentUserDisplay();
+            updateUserCards();
+            loadFamilyScreen();
+            
+            addFamilyFeed(currentUser, '清空了自己的积分');
+            showClearSuccessToast(`${currentUser}的积分已清空`);
+        }
+    );
+}
+
+// 清空所有用户积分
+function clearAllUsersPoints() {
+    let summary = '';
+    Object.keys(users).forEach(userName => {
+        const u = users[userName];
+        summary += `• ${userName}：积分 ${u.points}，累计 ${u.totalPoints}\n`;
+    });
+    
+    showClearConfirm(
+        '⚠️ 确定要清空所有成员的积分吗？',
+        `当前各成员积分情况：\n${summary}\n清空后所有成员的积分、等级、积分类成就都将重置！\n此操作不可撤销！`,
+        () => {
+            Object.keys(users).forEach(userName => {
+                users[userName].points = 0;
+                users[userName].totalPoints = 0;
+                users[userName].level = '新手';
+                recheckAchievementsAfterUndo(userName);
+            });
+            
+            saveData();
+            updateCurrentUserDisplay();
+            updateUserCards();
+            loadFamilyScreen();
+            
+            addFamilyFeed(currentUser, '清空了所有成员的积分');
+            showClearSuccessToast('所有成员的积分已清空');
+        }
+    );
+}
+
+// 显示积分清空确认弹窗
+function showClearConfirm(title, detail, onConfirm) {
+    // 移除已有的确认弹窗
+    const existingModal = document.getElementById('clear-confirm-modal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'clear-confirm-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="confirm-modal-content">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">${title}</div>
+            <div class="warning-detail">${detail.replace(/\n/g, '<br>')}</div>
+            <div class="confirm-modal-actions">
+                <button class="confirm-cancel" onclick="closeClearConfirm()">取消</button>
+                <button class="confirm-danger" id="confirm-clear-btn">确认清空</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 绑定确认按钮
+    document.getElementById('confirm-clear-btn').addEventListener('click', () => {
+        closeClearConfirm();
+        onConfirm();
+    });
+}
+
+// 关闭清空确认弹窗
+function closeClearConfirm() {
+    const modal = document.getElementById('clear-confirm-modal');
+    if (modal) modal.remove();
+}
+
+// 显示清空成功提示
+function showClearSuccessToast(message) {
+    // 移除已有的提示
+    const existingToast = document.querySelector('.clear-success-toast');
+    if (existingToast) existingToast.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'clear-success-toast';
+    toast.textContent = `✅ ${message}`;
+    document.body.appendChild(toast);
+    
+    // 触发动画
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+    
+    // 3秒后自动消失
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
 // ============ 头像上传功能 ============
 
 // 加载所有保存的头像
