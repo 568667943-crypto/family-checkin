@@ -148,13 +148,36 @@ const levels = [
     { name: '宗师', minPoints: 2000 }
 ];
 
+// 数据版本号（用于兼容性检测）
+const DATA_VERSION = 2;
+
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
     checkAndResetAllUsersDailyTasks();
     loadAllAvatars();
     updateUserCards();
+    
+    // 显示数据加载状态（调试用，3秒后自动消失）
+    showDataStatus();
 });
+
+// 显示数据加载状态提示
+function showDataStatus() {
+    const savedData = localStorage.getItem('familyCheckinData');
+    if (savedData) {
+        try {
+            const parsed = JSON.parse(savedData);
+            const userCount = Object.keys(parsed).length;
+            console.log(`[状态] 数据加载完成，共 ${userCount} 个用户`);
+            Object.keys(parsed).forEach(name => {
+                console.log(`[状态] ${name}: 积分=${parsed[name].points}, 等级=${parsed[name].level}`);
+            });
+        } catch (e) {
+            console.error('[状态] 数据解析异常');
+        }
+    }
+}
 
 // 加载本地存储的数据
 function loadData() {
